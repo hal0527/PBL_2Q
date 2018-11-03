@@ -7,18 +7,16 @@ function test(){
   Logger.log(time);
 }
 function buildAddOn(e) {
-  // Activate temporary Gmail add-on scopes.
   
   var taskList = taskListData();
   var cards = [];
-  // Build a card for each recent thread from this email's sender.
+  
   if (taskList.length > 0) {
     taskList.forEach(function(listDate) {
       cards.push(buildRecentThreadCard(listDate));
     });
   } else {
-    // Present a blank card if there are no recent threads from
-    // this sender.
+
     cards.push(CardService.newCardBuilder()
       .setHeader(CardService.newCardHeader()
         .setTitle('No recent threads from this sender')).build());
