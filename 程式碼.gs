@@ -1,6 +1,11 @@
 var MAX_THREADS = 5;
 var a = 0;
 var test ;
+
+function test(){
+  var time = new Date();
+  Logger.log(time);
+}
 function buildAddOn(e) {
   // Activate temporary Gmail add-on scopes.
   
@@ -90,7 +95,7 @@ function buildRecentThreadCard(listDate){
   }
   //section.addWidget(checkboxGroup);
   var textButton = CardService.newTextButton()
-    .setText("create")
+    .setText("OK")
     .setOnClickAction(CardService.newAction()
                                  .setFunctionName("handleCheckboxChange"));
   section.addWidget(CardService.newButtonSet().addButton(textButton));
@@ -157,13 +162,16 @@ function handleCheckboxChange(e){
     if(selected_CHECK) {
       //task.setStatus('completed');
       for(a = 0; a < createdate.length;a++){
-       
-      var event = CalendarApp.getDefaultCalendar().createEvent(createdate[a],
-      new Date(startDate),
-      new Date(endDate));}
-        } else {
+        if(a > 0){
+          var startDate = formattedDate + parseInt(formattedHour+a)+":"+time_min+":00";
+          var endDate = formattedDate + parseInt(endHour+a)+":"+time_min+":00";
+        }
+        var event = CalendarApp.getDefaultCalendar().createEvent(createdate[a],
+        new Date(startDate),
+        new Date(endDate));}
+     } else {
       delEvents('bbbb');
-      }
+     }
  
   
 //setUpdateDraftBodyAction(updateDraftBodyAction)
