@@ -1,0 +1,28 @@
+{
+  "timeZone": "Asia/Tokyo",
+  "dependencies": {
+    "enabledAdvancedServices": [{
+      "userSymbol": "Tasks",
+      "serviceId": "tasks",
+      "version": "v1"
+    }, {
+      "userSymbol": "Calendar",
+      "serviceId": "calendar",
+      "version": "v3"
+    }]
+  },
+  
+  
+  "gmail": {
+    "name": "todo2cal",
+    "logoUrl": "http://mil.kilo.jp/aiit/todo2cal.jpg",
+    "contextualTriggers": [{
+      "unconditional": {
+      },
+      "onTriggerFunction": "buildAddOn"
+    }],
+    "primaryColor": "#ff5733",
+    "secondaryColor": "#33ff4c",
+    "openLinkUrlPrefixes": ["https://mail.google.com/"]
+  }
+}
