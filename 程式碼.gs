@@ -1,11 +1,4 @@
-var MAX_THREADS = 5;
-var a = 0;
-var test ;
 
-function test(){
-  var time = new Date();
-  Logger.log(time);
-}
 function buildAddOn(e) {
   
   var taskList = taskListData();
@@ -34,7 +27,7 @@ function taskListData() {
           'link': taskList.getSelfLink()
       });
     });
-     Logger.log(recents);
+     //Logger.log(recents);
       return recents;
 }
 
@@ -54,7 +47,7 @@ function taskData(listDateID){
       
       num++;
     });
-     Logger.log(recents);
+    // Logger.log(recents);
      return recents;
   
 }
@@ -63,16 +56,17 @@ function taskData(listDateID){
  
  
 function buildRecentThreadCard(listDate){
+
+   var scriptProperties = PropertiesService.getScriptProperties();
+   scriptProperties.setProperties({
+      'list_1': 'null',
+      'list_2': 'null',
+      'list_3': 'null'
+    });
   var taskDate = taskData(listDate.id);
   var card = CardService.newCardBuilder();
-  //var taskname = listTaskLists();
-  card.setHeader(CardService.newCardHeader().setTitle(listDate.name)
- 
-             //.setImageStyle(CardService.ImageStyle.SQUARE)
-             //.setImageUrl('https://www.example.com/images/headerImage.png')
-                 );
-  var section = CardService.newCardSection()
-    .setHeader('<font color=\"#1257e0\">Recent thread</font>');
+  card.setHeader(CardService.newCardHeader().setTitle(listDate.name));
+  var section = CardService.newCardSection();
   
    　if (taskDate) {
          for (var a = 0; a < taskDate.length; a++) {
@@ -81,17 +75,61 @@ function buildRecentThreadCard(listDate){
            var checkboxGroup = CardService.newSelectionInput()
                               .setType(CardService.SelectionInputType.CHECK_BOX)
                               .setFieldName('test') //taskDate1.num
-                              .addItem(taskDate1.name, taskDate1.name, false);
-           //.setOnChangeAction(CardService.newAction()
-            //                  .setFunctionName("handleCheckboxChange"));
-                              
-             //checkboxGroup.addItem(task.title, task.title, false)
+                              .addItem(taskDate1.name, taskDate1.name, false)
+                              .setOnChangeAction(CardService.newAction()
+                                                           .setFunctionName("checkChange"));
               section.addWidget(checkboxGroup);
            } 
       }
       //return
   }
   //section.addWidget(checkboxGroup);
+  var date = Utilities.formatDate(new Date(), "JST", "MMMMM d',' yyyy ");
+  var dropdownGroup = CardService.newSelectionInput()
+                              .setType(CardService.SelectionInputType.DROPDOWN)
+                              .setTitle('日付け')
+                              .setFieldName('date') //taskDate1.num
+                              .addItem(date, date, true);
+     for(var b = 1; b < 10; b++){
+        var dateChange = new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * b);
+        var date1 = Utilities.formatDate(dateChange, "JST", "MMMMM d',' yyyy ");
+        dropdownGroup.addItem(date1, date1, false);
+     }
+                              
+  section.addWidget(dropdownGroup);
+  
+  var hour = Utilities.formatDate(new Date(), "JST", "HH");
+  var dropdownGroup2 = CardService.newSelectionInput()
+                              .setType(CardService.SelectionInputType.DROPDOWN)
+                              .setTitle("時")
+                              .setFieldName('hour') //taskDate1.num
+                              .addItem(hour, hour, true);
+  
+     for(var c = 1; c < 24; c++){//(24 - hour)
+        var hour = Utilities.formatDate(new Date(), "JST", "HH");
+        var hourChange = new Date(new Date().getTime() + 1000 * 60 * 60 * c);
+        var hour1 = Utilities.formatDate(hourChange, "JST", "HH");
+        dropdownGroup2.addItem(hour1, hour1, false);
+     }                     
+  section.addWidget(dropdownGroup2); 
+  
+   var min = Utilities.formatDate(new Date(), "JST", "mm");
+   var test = Math.ceil(min/10)*10;;
+   var dropdownGroup3 = CardService.newSelectionInput()
+                              .setType(CardService.SelectionInputType.DROPDOWN)
+                              .setTitle("分")
+                              .setFieldName('min') //taskDate1.num
+                              .addItem(test, test, true);
+     
+     for(var d = 1; d <6; d++){ //(60 - min)
+        var minChange = new Date(new Date().getTime() + 1000 * 60 * 10 * d);
+        var time_min = Utilities.formatDate(minChange, "JST", "mm");
+        var min1 = Math.ceil(time_min/10)*10;
+        dropdownGroup3.addItem(min1, min1, false);
+     }
+                              
+  section.addWidget(dropdownGroup3);
+  
   var textButton = CardService.newTextButton()
     .setText("OK")
     .setOnClickAction(CardService.newAction()
@@ -104,156 +142,106 @@ function buildRecentThreadCard(listDate){
         .setUrl("https://calendar.google.com/calendar/r"));
   section.addWidget(CardService.newButtonSet().addButton(textButton));
   
-  
-  
   card.addSection(section);
   return card.build();
 }
 
+function checkChange(e){
+  var test = e.formInputs.test;
+  
+  var userProperties = PropertiesService.getScriptProperties();
+ 
+  for(var a = 0;a < test.length;a++){
+     var check = e.formInputs.test[a];
+     var repeat= false;
+     for(var b = 1;b < 4;b++){
+       var checkname = 'list_' + b;
+       var checkunits = userProperties.getProperty(checkname);
+       if(check == checkunits){
+          repeat= true;
+           break;
+        }
+      }
+      if(!repeat){
+         for(var i = 1;i < 4;i++){
+            var name = 'list_' + i;
+            var units = userProperties.getProperty(name);
+            if(units == 'null'){
+              units = check; // Only changes local value, not stored value.
+              userProperties.setProperty(name, units); // Updates stored value.
+              var userProperties1 = PropertiesService.getScriptProperties();
+              var data = userProperties1.getProperties();
+              var units1 = userProperties1.getProperty(name);
+              Logger.log(units1);
+              Logger.log(data);
+              break;
+            }
+        }
+      }
+  }
+  
 
-
-
-
-
-
+  //var del = PropertiesService.getScriptProperties();
+  //del.deleteAllProperties();
+}
 
 function handleCheckboxChange(e){
+
   var num = 1;
   var selected_CHECK = !!e.formInput.test;
   var createdate = e.formInputs.test;
- 
-  var event_date =new Array();
-  //var eventName = e.formInput.checkbox_field;
+  var addDate = e.formInputs.date;
+  var addHour = e.formInputs.hour;
+  var addMin = e.formInputs.min;
+  
   var endHour;
-  var a = 0;
-  var formattedDate = Utilities.formatDate(new Date(), "JST", "MMMMM d',' yyyy ");
-  var formattedHour = Utilities.formatDate(new Date(), "JST","HH");
-  var formattedtime = Utilities.formatDate(new Date(), "JST","mm");
   var now = new Date();
   var threeHoursFromNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
   var event_had = CalendarApp.getDefaultCalendar().getEvents(now, threeHoursFromNow);
-  if(formattedtime <= 50){
+  if(addMin <= 50){
      if(event_had){
-      var time_min = Math.ceil(formattedtime/10)*10;
-      formattedHour = parseInt(formattedHour) + event_had.length;
-      endHour = parseInt(formattedHour) + 1;
+      var time_min = Math.ceil(addMin/10)*10;
+      addHour = parseInt(addHour) + event_had.length;
+      endHour = parseInt(addHour) + 1;
      } else {
-        var time_min = Math.ceil(formattedtime/10)*10;
-        formattedHour = parseInt(formattedHour) ;
-        endHour = parseInt(formattedHour) + 1;
+        var time_min = Math.ceil(addMin/10)*10;
+        addHour = parseInt(addHour) ;
+        endHour = parseInt(addHour) + 1;
         }
    } else {
     if(event_had){
-      formattedHour = parseInt(formattedHour) + event_had.length ;
-      endHour = parseInt(formattedHour) + 1;
+      addHour = parseInt(addHour) + event_had.length ;
+      endHour = parseInt(addHour) + 1;
       time_min ="00";
      } else {
-      formattedHour = parseInt(formattedHour);
-      endHour = parseInt(formattedHour) + 1;
+      addHour = parseInt(addHour);
+      endHour = parseInt(addHour) + 1;
       time_min ="00";
      }
   }
-  var startDate = formattedDate + formattedHour+":"+time_min+":00";
-  var endDate = formattedDate + endHour+":"+time_min+":00";
+  var startDate = addDate + addHour+":"+time_min+":00";
+  var endDate = addDate + endHour+":"+time_min+":00";
   
   // you can set and access paramters in the onchange action for further use.
     if(selected_CHECK) {
       //task.setStatus('completed');
       for(a = 0; a < createdate.length;a++){
-        if(a > 0){
-          var startDate = formattedDate + parseInt(formattedHour+a)+":"+time_min+":00";
-          var endDate = formattedDate + parseInt(endHour+a)+":"+time_min+":00";
+        var name = 'list_' + (a+1);
+        var userProperties1 = PropertiesService.getScriptProperties();
+        var eventName = userProperties1.getProperty(name);
+        if(eventName !== 'null'){
+          var startDate = addDate + parseInt(addHour+a)+":"+time_min+":00";
+          var endDate = addDate + parseInt(endHour+a)+":"+time_min+":00";   
+          var event = CalendarApp.getDefaultCalendar().createEvent(eventName,
+          new Date(startDate),
+          new Date(endDate));}
         }
-        var event = CalendarApp.getDefaultCalendar().createEvent(createdate[a],
-        new Date(startDate),
-        new Date(endDate));}
-     } else {
-      delEvents('bbbb');
-     }
- 
-  
-//setUpdateDraftBodyAction(updateDraftBodyAction)
-  
-/*
-  //var task = Tasks.Tasks.get(listDate.id, taskId);
-  var selected = e.formInput.checkbox_TASK;
-  var selected_CHECK = !!e.formInput.checkbox_TASK;
-  var event_date =new Array();
-  //var eventName = e.formInput.checkbox_field;
-  var endHour;
-  var a = 0;
-  var formattedDate = Utilities.formatDate(new Date(), "JST", "MMMMM d',' yyyy ");
-  var formattedHour = Utilities.formatDate(new Date(), "JST","HH");
-  var formattedtime = Utilities.formatDate(new Date(), "JST","mm");
-  var now = new Date();
-  var threeHoursFromNow = new Date(now.getTime() + (3 * 60 * 60 * 1000));
-  var event_had = CalendarApp.getDefaultCalendar().getEvents(now, threeHoursFromNow);
-  if(formattedtime <= 50){
-     if(event_had){
-      var time_min = Math.ceil(formattedtime/10)*10;
-      formattedHour = parseInt(formattedHour) + event_had.length;
-      endHour = parseInt(formattedHour) + 1;
-     } else {
-        var time_min = Math.ceil(formattedtime/10)*10;
-        formattedHour = parseInt(formattedHour) ;
-        endHour = parseInt(formattedHour) + 1;
-        }
-   } else {
-    if(event_had){
-      formattedHour = parseInt(formattedHour) + event_had.length ;
-      endHour = parseInt(formattedHour) + 1;
-      time_min ="00";
-     } else {
-      formattedHour = parseInt(formattedHour);
-      endHour = parseInt(formattedHour) + 1;
-      time_min ="00";
-     }
-  }
-  var startDate = formattedDate + formattedHour+":"+time_min+":00";
-  var endDate = formattedDate + endHour+":"+time_min+":00";
-  
-  // you can set and access paramters in the onchange action for further use.
-    if(selected_CHECK) {
-      //task.setStatus('completed');
-      var event = CalendarApp.getDefaultCalendar().createEvent(selected,
-      new Date(startDate),
-      new Date(endDate));
-        } else {
-      delEvents('bbbb');
-      }
-     /* for (i = 0; i < 10; i++){
-        if(!event_date[i]){
-           event_date[i] = selected;
-           break;
-        }
-       }*/
-     /* 
-      return CardService.newActionResponseBuilder().setNavigation(
-    CardService.newNavigation().updateCard(
-      // Build your result card here
-    )
-  ).build()*/
-  
+       var del = PropertiesService.getScriptProperties();
+       del.deleteAllProperties();
+       return CardService.newActionResponseBuilder()
+      .setNotification(CardService.newNotification()
+          .setType(CardService.NotificationType.INFO)
+          .setText("イベント追加成功"))
+      .build();
+     } 
     }
-
-function delEvents(selected) {
-  var calendarId = 'primary';
-  var optionalArgs = {
-    timeMin: (new Date()).toISOString(),
-    showDeleted: false,
-    singleEvents: true,
-    maxResults: 10,
-    orderBy: 'startTime'
-  };
-  var response = Calendar.Events.list(calendarId, optionalArgs);
-  var events = response.items;
-  if (events.length > 0) {
-    for (i = 0; i < events.length; i++) {
-      var event = events[i];
-      if ( event.summary == selected){
-        var delEvent = CalendarApp.getDefaultCalendar().getEventById(event.id); 
-        delEvent.deleteEvent();
-      } 
-    }
-  } 
-}
