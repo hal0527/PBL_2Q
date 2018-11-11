@@ -50,16 +50,54 @@ function buildTaskCard(tasklistobject){
   var taskObject = getTasks(tasklistobject.id);
   var section = CardService.newCardSection()
   .setHeader("<font color=\"#1257e0\">タスク一覧</font>");
+  /*test
+  var checkboxGroup = CardService.newSelectionInput()
+  .setType(CardService.SelectionInputType.CHECK_BOX)
+  .setTitle("A group of checkboxes. Multiple selections are allowed.")
+  .setFieldName("checkbox_field")
+  .addItem("checkbox one title", "checkbox_one_value", false)
+//  .addItem("checkbox two title", "checkbox_two_value", true)
+//  .addItem("checkbox three title", "checkbox_three_value", false)
+  .setOnChangeAction(CardService.newAction()
+                     .setFunctionName("handleCheckboxChange"));
+          section.addWidget(checkboxGroup);
+//test*/
+  
+  taskObject.forEach(function(value){
+    var checkboxGroup = CardService.newSelectionInput()
+    .setType(CardService.SelectionInputType.CHECK_BOX)
+   // .setTitle("A group of checkboxes. Multiple selections are allowed.")
+    .setFieldName("checkbox_field")
+    .addItem(value.title, value.id, false)
+    .setOnChangeAction(CardService.newAction()
+                     .setFunctionName("handleCheckboxChange"));
+          section.addWidget(checkboxGroup);
+  });
+  card.addSection(section);
+/*
   taskObject.forEach(function(value){
     section.addWidget(CardService.newKeyValue()
                       .setTopLabel('タスク名')
                       .setContent(value.title));
   });
   card.addSection(section);
+*/
   return card.build();
 }
 
-//var box=;
+/*
+var checkboxGroup = CardService.newSelectionInput()
+    .setType(CardService.SelectionInputType.CHECK_BOX)
+    .setTitle("A group of checkboxes. Multiple selections are allowed.")
+    .setFieldName("checkbox_field")
+    .addItem("checkbox one title", "checkbox_one_value", false)
+    .addItem("checkbox two title", "checkbox_two_value", true)
+    .addItem("checkbox three title", "checkbox_three_value", false)
+    .setOnChangeAction(CardService.newAction()
+        .setFunctionName("handleCheckboxChange"));
+        section.addWidget(checkboxGroup);
+
+*/
 
 
 
