@@ -58,7 +58,7 @@ function buildCard_task(listDate){
   var checkboxGroup = CardService.newSelectionInput()
                                  .setType(CardService.SelectionInputType.CHECK_BOX)
                                  .setFieldName('check_box');
-     for (var a = 0; a < taskDate.length; a++) {
+     for (var a = 0; a <= taskDate.length-1; a++) {
         var taskDate1 = taskDate[a];
         if(taskDate1.status == 'needsAction'){
            checkboxGroup.addItem(taskDate1.name, taskDate1.name, false);
@@ -72,7 +72,7 @@ function buildCard_task(listDate){
                                  .setTitle('日付け')
                                  .setFieldName('date') //taskDate1.num
                                  .addItem(date, date, true);
-  for(var b = 1; b < 10; b++){
+  for(var b = 1; b <= 9; b++){
      var dateChange = new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * b);
      var date1 = Utilities.formatDate(dateChange, "JST", "MMMMM d',' yyyy ");
      dropdownGroup.addItem(date1, date1, false);
@@ -86,7 +86,7 @@ function buildCard_task(listDate){
                               .setFieldName('hour') //taskDate1.num
                               .addItem(hour, hour, true);
   
-     for(var c = 1; c < 24; c++){//(24 - hour)
+     for(var c = 1; c <= 23; c++){//(24 - hour)
         var hour = Utilities.formatDate(new Date(), "JST", "HH");
         var hourChange = new Date(new Date().getTime() + 1000 * 60 * 60 * c);
         var hour1 = Utilities.formatDate(hourChange, "JST", "HH");
@@ -100,17 +100,12 @@ function buildCard_task(listDate){
                                    .setType(CardService.SelectionInputType.DROPDOWN)
                                     .setTitle("分")
                                     .setFieldName('min') //taskDate1.num
-                                    .addItem(test, test, true);
-     
-   for(var d = 1; d <6; d++){ //(60 - min)
-      var minChange = new Date(new Date().getTime() + 1000 * 60 * 10 * d);
-      var time_min = Utilities.formatDate(minChange, "JST", "mm");
-      var min1 = Math.ceil(time_min/10)*10;
-       if(min1 == 60){
-         dropdownGroup3.addItem('00.0', '00.0', false);
-       } else {
-         dropdownGroup3.addItem(min1, min1, false);
-       }
+   for(var d = 0; d <=5; d++){ //(60 - min)
+     var minChange = new Date(new Date().getTime() + 1000 * 60 * 10 * d);
+     var time_min = Utilities.formatDate(minChange, "JST", "mm");
+     var minDouble = Math.ceil(time_min/10)*10;
+     var min1 = minDouble.toFixed();
+     dropdownGroup3.addItem(min1, min1, false);
    }
                               
   section.addWidget(dropdownGroup3);
@@ -181,7 +176,7 @@ function handleCheckboxChange(e){
     return CardService.newActionResponseBuilder()
                       .setNotification(CardService.newNotification()
                       .setType(CardService.NotificationType.INFO)
-                      .setText("Completed!"))
+                      .setText("Added to Calendar!"))
                       .build();
   } 
 }
