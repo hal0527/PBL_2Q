@@ -9,7 +9,7 @@ function cal2todo_AddOn(e) {
   } else {
     cards.push(CardService.newCardBuilder()
          .setHeader(CardService.newCardHeader()
-         .setTitle('No recent threads from this sender')).build());
+         .setTitle('No Tasklist from Google Tasks')).build());
   }
   return cards;
 }
@@ -181,7 +181,7 @@ function handleCheckboxChange(e){
     return CardService.newActionResponseBuilder()
                       .setNotification(CardService.newNotification()
                       .setType(CardService.NotificationType.INFO)
-                      .setText("イベント追加成功"))
+                      .setText("Completed!"))
                       .build();
   } 
 }
