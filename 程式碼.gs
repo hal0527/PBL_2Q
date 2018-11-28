@@ -164,11 +164,11 @@ function handleCheckboxChange(e){
   
   // you can set and access paramters in the onchange action for further use.
   if(selected_CHECK) {
-    for(a = 0; a < createdate.length;a++){
-      var eventName = createdate[a];
+    for(i = 0; i < createdate.length;i++){
+      var eventName = createdate[i];
       if(eventName !== 'null'){
-        var startDate = addDate + parseInt(addHour+a)+":"+time_min+":00";
-        var endDate = addDate + parseInt(endHour+a)+":"+time_min+":00";
+        var startDate = addDate + parseInt(addHour+i)+":"+time_min+":00";
+        var endDate = addDate + parseInt(endHour+i)+":"+time_min+":00";
         var event = CalendarApp.getDefaultCalendar().createEvent(eventName,
                                                                  new Date(startDate),
                                                                  new Date(endDate));
@@ -211,7 +211,7 @@ function getMaildata(e) {
                               
   var eventName = CardService.newTextInput()
                              .setFieldName("eventName_input")
-                             .setTitle("イベント名前")
+                             .setTitle("イベント名")
                              .setValue(title);
  
   var memo = CardService.newTextInput()
@@ -261,7 +261,7 @@ function getMaildata(e) {
   }                     
   var event_timeGroup = CardService.newSelectionInput()
                                    .setType(CardService.SelectionInputType.DROPDOWN)
-                                   .setTitle("イベント時長")
+                                   .setTitle("予定時間")
                                    .setFieldName('event_time') //taskDate1.num
   
   for(var j = 1; j < 5; j++){//(24 - hour)
