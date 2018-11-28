@@ -164,11 +164,11 @@ function handleCheckboxChange(e){
   
   // you can set and access paramters in the onchange action for further use.
   if(selected_CHECK) {
-    for(a = 0; a < createdate.length;a++){
-      var eventName = createdate[a];
+    for(i = 0; i < createdate.length;i++){
+      var eventName = createdate[i];
       if(eventName !== 'null'){
-        var startDate = addDate + parseInt(addHour+a)+":"+time_min+":00";
-        var endDate = addDate + parseInt(endHour+a)+":"+time_min+":00";
+        var startDate = addDate + parseInt(addHour+i)+":"+time_min+":00";
+        var endDate = addDate + parseInt(endHour+i)+":"+time_min+":00";
         var event = CalendarApp.getDefaultCalendar().createEvent(eventName,
                                                                  new Date(startDate),
                                                                  new Date(endDate));
@@ -181,3 +181,147 @@ function handleCheckboxChange(e){
     .build();
   }
 }
+
+function getMaildata(e) {
+  var accessToken = e.messageMetadata.accessToken;
+  GmailApp.setCurrentMessageAccessToken(accessToken);
+  var section = CardService.newCardSection();
+  var messageId = e.messageMetadata.messageId;
+  var message = GmailApp.getMessageById(messageId);
+  var textbody = message.getPlainBody();
+  var title = message.getSubject();
+  var url = message.getThread().getPermalink();
+  var date,time;
+   textbody.replace(/((\d{4}年(\d{1,2}月)\d{1,2}日))/g, function ($0) {
+    if ($0 && $0 != date) {
+       date = $0;
+       date = date.replace(/年/g, '/');
+       date = date.replace(/月/g, '/');
+       date = date.replace(/日/g, '');
+     }
+  })
+  
+  textbody.replace(/(\d{1,2}(:\d{1,2}))/g, function ($0) {
+    if ($0 && $0 != time) {
+       time = $0;
+     }
+  })
+  textbody.replace();
+  //var text = message.getPlainBody()
+                              
+  var eventName = CardService.newTextInput()
+                             .setFieldName("eventName_input")
+                             .setTitle("イベント名前")
+                             .setValue(title);
+ 
+  var memo = CardService.newTextInput()
+                             .setFieldName("memo_input")
+                             .setTitle("メモ");
+  var email_link = CardService.newTextInput()
+                             .setFieldName("email_link")
+                             .setTitle("リンク")
+                             .setValue(url);
+                             
+  var timeGroup = CardService.newSelectionInput()
+                              .setType(CardService.SelectionInputType.DROPDOWN)
+                              .setTitle("時間")
+                              .setFieldName('time') //taskDate1.num
+                              .addItem(time, time, true);
+  
+  for(var i = 1; i < 24; i++){//(24 - hour)
+      var timeChange = time.substr(0, 2);
+      var time1 = Number(timeChange) + i;
+      if(time1 >= 24){
+        time1 = time1 - 24;
+      }
+      
+      timeGroup.addItem(time1, time1, false);
+  }                                                
+ 
+  var dateGroup = CardService.newSelectionInput()
+                                 .setType(CardService.SelectionInputType.DROPDOWN)
+                                 .setTitle('日付け')
+                                 .setFieldName('date') //taskDate1.num
+                                 .addItem(date, date, true);                
+  
+  var calNum = CalendarApp.getAllCalendars();
+  var calname0 = CalendarApp.getDefaultCalendar().getName();
+  var calGroup = CardService.newSelectionInput()
+                              .setType(CardService.SelectionInputType.DROPDOWN)
+                              .setTitle("カレンダー")
+                              .setFieldName('calendar_name') //taskDate1.num
+                              .addItem(calname0, calname0, true);
+  for(var i = 0; i < calNum.length; i++){
+      var event = CalendarApp.getAllCalendars();
+      var calname = calNum[i].getName();
+      var claid = calNum[i].getId();
+      if(calname !== calname0){
+        calGroup.addItem(calname, claid, false);
+      }
+  }                     
+  var event_timeGroup = CardService.newSelectionInput()
+                                   .setType(CardService.SelectionInputType.DROPDOWN)
+                                   .setTitle("時間")
+                                   .setFieldName('event_time') //taskDate1.num
+  
+  for(var j = 1; j < 5; j++){//(24 - hour)
+      var event_time = j;
+      event_timeGroup.addItem(event_time, event_time, false);
+  }          
+  
+  var textParagraph = CardService.newTextParagraph()
+                                 .setText(textbody);
+  
+  var textButton = CardService.newTextButton()
+                              .setText("追加する")
+                              .setOnClickAction(CardService.newAction()
+                                                           .setFunctionName("addEvent"));
+                                                         
+  section.addWidget(eventName); 
+  section.addWidget(memo);
+  section.addWidget(calGroup);
+  section.addWidget(dateGroup);
+  section.addWidget(timeGroup);  
+  section.addWidget(event_timeGroup);
+  section.addWidget(textButton);
+  section.addWidget(textParagraph);
+  section.addWidget(email_link);
+  
+  var card = CardService.newCardBuilder()
+    .setHeader(CardService.newCardHeader()
+                          .setTitle('<font color="#ea9999">イベント追加</font>'))
+    .addSection(section)
+    .build();
+  return CardService.newUniversalActionResponseBuilder()
+      .displayAddOnCards([card])
+      .build();
+}
+
+function addEvent(e){
+  var addEvent_Name = e.formInputs.eventName_input;
+  var addEvent_Memo = e.formInputs.memo_input;
+  var addEvent_Date = e.formInputs.date;
+  var addEvent_Time = e.formInputs.time;
+  var addEvent_long = e.formInputs.event_time;
+  var Calendar_Id = e.formInputs.calendar_name;
+  var email_url = e.formInputs.email_link;
+  var endHour;  
+  email_url = email_url.toString();
+  if(addEvent_Name !== 'null'){
+     var startTime = addEvent_Date + " " + addEvent_Time;
+     var time = addEvent_Time.toString();
+     time = time.substr(0,2);
+     time = Number(time) + Number(addEvent_long);
+     var endTime = addEvent_Date + " "+ time + ":00";   
+     var event = CalendarApp.getCalendarById(Calendar_Id).createEvent(addEvent_Name,
+                                                                      new Date(startTime),
+                                                                      new Date(endTime),
+                                                                      {location: 'The Moon',
+                                                                       description: email_url});
+  }  
+  return CardService.newActionResponseBuilder()
+                    .setNotification(CardService.newNotification()
+                    .setType(CardService.NotificationType.INFO)
+                    .setText("イベント追加成功"))
+                    .build();
+} 
