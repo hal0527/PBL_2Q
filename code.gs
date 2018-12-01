@@ -190,59 +190,62 @@ function getMaildata(e) {
   var message = GmailApp.getMessageById(messageId);
   var textbody = message.getPlainBody();
   var title = message.getSubject();
+  GmailApp.ge
   var url = message.getThread().getPermalink();
   var date,time;
-   textbody.replace(/((\d{4}年(\d{1,2}月)\d{1,2}日))/g, function ($0) {
+  textbody.replace(/((\d{4}年(\d{1,2}月)\d{1,2}日))/g, function ($0) {
     if ($0 && $0 != date) {
        date = $0;
        date = date.replace(/年/g, '/');
        date = date.replace(/月/g, '/');
        date = date.replace(/日/g, '');
+       Logger.log('111');
+     } else {
+       date = '2018/12/12';
+       Logger.log('222');
      }
   })
-  
+  if(date == undefined){
+    date = '2018/12/12';//now
+  }
+  Logger.log(test);
   textbody.replace(/(\d{1,2}(:\d{1,2}))/g, function ($0) {
     if ($0 && $0 != time) {
        time = $0;
      }
   })
-  textbody.replace();
-  //var text = message.getPlainBody()
-                              
+  textbody.replace(); 
+  //カードの設定                            
   var eventName = CardService.newTextInput()
                              .setFieldName("eventName_input")
-                             .setTitle("イベント名")
+                             .setTitle("イベント名前")
                              .setValue(title);
- 
   var memo = CardService.newTextInput()
-                             .setFieldName("memo_input")
-                             .setTitle("メモ");
+                        .setFieldName("memo_input")
+                        .setTitle("メモ");
   var email_link = CardService.newTextInput()
-                             .setFieldName("email_link")
-                             .setTitle("リンク")
-                             .setValue(url);
-                             
+                              .setFieldName("email_link")
+                              .setTitle("リンク")
+                              .setValue(url);                         
+  var event_date = date.toString();
+  var event_dateGroup = CardService.newTextInput()
+                                   .setFieldName("date")
+                                   .setTitle("日付け")
+                                   .setValue(event_date);                                                        
   var timeGroup = CardService.newSelectionInput()
-                              .setType(CardService.SelectionInputType.DROPDOWN)
-                              .setTitle("時間")
-                              .setFieldName('time') //taskDate1.num
-                              .addItem(time, time, true);
+                             .setType(CardService.SelectionInputType.DROPDOWN)
+                             .setTitle("時間")
+                             .setFieldName('time') //taskDate1.num
   
-  for(var i = 1; i < 24; i++){//(24 - hour)
+  for(var i = 0; i < 24; i++){//(24 - hour)
       var timeChange = time.substr(0, 2);
-      var time1 = Number(timeChange) + i;
-      if(time1 >= 24){
-        time1 = time1 - 24;
+      var time1 = i;
+      if(time1 == timeChange){
+        timeGroup.addItem(time1, time1, true);
+      } else {
+        timeGroup.addItem(time1, time1, false);
       }
-      
-      timeGroup.addItem(time1, time1, false);
-  }                                                
- 
-  var dateGroup = CardService.newSelectionInput()
-                                 .setType(CardService.SelectionInputType.DROPDOWN)
-                                 .setTitle('日付け')
-                                 .setFieldName('date') //taskDate1.num
-                                 .addItem(date, date, true);                
+  }                                                             
   
   var calNum = CalendarApp.getAllCalendars();
   var calname0 = CalendarApp.getDefaultCalendar().getName();
@@ -251,21 +254,22 @@ function getMaildata(e) {
                               .setTitle("カレンダー")
                               .setFieldName('calendar_name') //taskDate1.num
                               .addItem(calname0, calname0, true);
-  for(var i = 0; i < calNum.length; i++){
+  for(var j = 0; j < calNum.length; j++){
       var event = CalendarApp.getAllCalendars();
-      var calname = calNum[i].getName();
-      var claid = calNum[i].getId();
+      var calname = calNum[j].getName();
+      var claid = calNum[j].getId();
       if(calname !== calname0){
         calGroup.addItem(calname, claid, false);
       }
   }                     
-  var event_timeGroup = CardService.newSelectionInput()
-                                   .setType(CardService.SelectionInputType.DROPDOWN)
-                                   .setTitle("予定時間")
-                                   .setFieldName('event_time') //taskDate1.num
   
-  for(var j = 1; j < 5; j++){//(24 - hour)
-      var event_time = j;
+  var event_timeGroup = CardService.newSelectionInput()
+                              .setType(CardService.SelectionInputType.DROPDOWN)
+                              .setTitle("イベント時長")
+                              .setFieldName('event_time') //taskDate1.num
+  
+  for(var l = 1; l < 25; l++){//(24 - hour)
+      var event_time = l;
       event_timeGroup.addItem(event_time, event_time, false);
   }          
   
@@ -280,11 +284,10 @@ function getMaildata(e) {
   section.addWidget(eventName); 
   section.addWidget(memo);
   section.addWidget(calGroup);
-  section.addWidget(dateGroup);
+  section.addWidget(event_dateGroup);
   section.addWidget(timeGroup);  
   section.addWidget(event_timeGroup);
   section.addWidget(textButton);
-  section.addWidget(textParagraph);
   section.addWidget(email_link);
   
   var card = CardService.newCardBuilder()
@@ -313,12 +316,14 @@ function addEvent(e){
      time = time.substr(0,2);
      time = Number(time) + Number(addEvent_long);
      var endTime = addEvent_Date + " "+ time + ":00";   
+     var memo = addEvent_Memo + email_url;
      var event = CalendarApp.getCalendarById(Calendar_Id).createEvent(addEvent_Name,
                                                                       new Date(startTime),
                                                                       new Date(endTime),
                                                                       {location: 'The Moon',
-                                                                       description: email_url});
-  }  
+                                                                       description: memo});
+  } 
+    
   return CardService.newActionResponseBuilder()
                     .setNotification(CardService.newNotification()
                     .setType(CardService.NotificationType.INFO)
