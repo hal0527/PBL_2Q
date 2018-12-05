@@ -16,11 +16,13 @@
   "gmail": {
     "name": "Todo2Cal",
     "logoUrl": "http://mil.kilo.jp/aiit/todo2cal.jpg",
-    "contextualTriggers": [{
-      "unconditional": {
-      },
-      "onTriggerFunction": "buildAddOn"
-    }],
+     "universalActions": [{
+        "text": "メールからイベント追加",
+        "runFunction": "GmailAddOn"
+      }, {
+        "text": "todo listからイベント追加",
+        "runFunction": "Cal2TodoAddOn"
+      }],
     "primaryColor": "#4285F4",
     "secondaryColor": "#4285F4",
     "openLinkUrlPrefixes": ["https://mail.google.com/"]
