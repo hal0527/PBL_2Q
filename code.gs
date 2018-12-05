@@ -245,13 +245,13 @@ function GmailAddOn(e) {
                              .setFieldName('time') //taskDate1.num
   
   for(var i = 0; i < 24; i++){//(24 - hour)
-      var timeChange = time.substr(0, 2);
-      var time1 = i;
-      if(time1 == timeChange){
-        timeGroup.addItem(time1, time1, false)
+      var timeCatch = time.substr(0, 2);
+      var start_time = i.toFixed() + ':00';
+      if(i.toFixed() == timeCatch){
+        timeGroup.addItem(start_time, start_time, false)
                  .addItem(time, time, true);
       } else {
-        timeGroup.addItem(time1, time1, false);
+        timeGroup.addItem(start_time, start_time, false);
       }
   }                                                             
   
@@ -318,14 +318,18 @@ function AddEventGmail(e){
   if(addEvent_Name !== 'null'){
      var startTime = addEvent_Date + " " + addEvent_Time;
      var time = addEvent_Time.toString();
-     time = time.substr(0,2);
-     time = Number(time) + Number(addEvent_long);
-     var endTime = addEvent_Date + " "+ time + ":00";   
+     var end_hour = time.substr(0,2);
+     var end_min= time.substr(2,3);
+     end_hour = Number(end_hour) + Number(addEvent_long);
+     var endTime = addEvent_Date + " "+ end_hour + end_min;   
      var memo = addEvent_Memo + email_url;
      var event = CalendarApp.getCalendarById(Calendar_Id).createEvent(addEvent_Name,
                                                                       new Date(startTime),
                                                                       new Date(endTime),
                                                                       {description: memo});
+                                                                      
+                                                           Logger.log(startTime);
+                                                           Logger.log(endTime);
   } 
     
   return CardService.newActionResponseBuilder()
