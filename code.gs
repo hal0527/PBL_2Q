@@ -247,8 +247,9 @@ function GmailAddOn(e) {
   for(var i = 0; i < 24; i++){//(24 - hour)
       var timeChange = time.substr(0, 2);
       var time1 = i;
+    time1=time1.toFixed();
       if(time1 == timeChange){
-        timeGroup.addItem(time1, time1, false)
+        timeGroup.addItem(time1+":00", time1, false)
                  .addItem(time, time, true);
       } else {
         timeGroup.addItem(time1, time1, false);
