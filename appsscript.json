@@ -11,18 +11,20 @@
       "version": "v3"
     }]
   },
-  
-  
+  "exceptionLogging": "STACKDRIVER",
+ 
   "gmail": {
-    "name": "todo2cal",
+    "name": "Todo2Cal",
     "logoUrl": "http://mil.kilo.jp/aiit/todo2cal.jpg",
-    "contextualTriggers": [{
-      "unconditional": {
-      },
-      "onTriggerFunction": "buildAddOn"
-    }],
-    "primaryColor": "#ff5733",
-    "secondaryColor": "#33ff4c",
+     "universalActions": [{
+        "text": "メールからイベント追加",
+        "runFunction": "GmailAddOn"
+      }, {
+        "text": "todo listからイベント追加",
+        "runFunction": "Cal2TodoAddOn"
+      }],
+    "primaryColor": "#4285F4",
+    "secondaryColor": "#4285F4",
     "openLinkUrlPrefixes": ["https://mail.google.com/"]
   }
 }
