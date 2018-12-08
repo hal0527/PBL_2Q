@@ -1,4 +1,6 @@
 function buildAddOn(e) {
+  var accessToken = e.messageMetadata.accessToken;
+  GmailApp.setCurrentMessageAccessToken(accessToken);
   var project_list = ProjectListData();
   var cards = []; 
   if (project_list.length > 0) {
