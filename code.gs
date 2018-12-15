@@ -29,6 +29,10 @@ function TaskListData() {
 function TaskData(listDataID){
   var tasks = Tasks.Tasks.list(listDataID).getItems();
   var recents = [];
+  // ############# add ###############
+ if (!tasks) {
+　return [　];
+	 	}
   tasks.forEach(function(task) {
     recents.push({
       'id': task.getId(),
@@ -50,8 +54,8 @@ function BuildCardTask(listData){
                                             .setImageStyle(CardService.ImageStyle.SQUARE)
                                             .setImageUrl("http://icons.iconarchive.com/icons/icons8/ios7/128/User-Interface-Checklist-icon.png"));
   var section = CardService.newCardSection();
-  
-  if (taskData) {
+  // ################ MOD ############# 
+if (taskDate.length > 0) {
     var checkboxGroup = CardService.newSelectionInput()
                                    .setType(CardService.SelectionInputType.CHECK_BOX)
                                    .setFieldName('check_box');
@@ -188,8 +192,10 @@ function AddEventTask(e){
                       .build();
   }
 }
-
 function GmailAddOn(e) {
+  function readSender(e) {
+  return mailMessage.getFrom();
+}
   var accessToken = e.messageMetadata.accessToken;
   GmailApp.setCurrentMessageAccessToken(accessToken);
   var section = CardService.newCardSection();
@@ -216,42 +222,59 @@ function GmailAddOn(e) {
   if(time == undefined){
     time = Utilities.formatDate(new Date(), "JST", "HH:mm");
   }
+  //Logger.log(test);
   textbody.replace(/(\d{1,2}(:\d{1,2}))/g, function ($0) {
     if ($0 && $0 != time) {
        time = $0;
      }
   })
   textbody.replace(); 
-  //カードの設定                            
+  //カードの設定
+  var eventName_0 = CardService.newKeyValue()
+ .setIcon(CardService.Icon.HOTEL_ROOM_TYPE) 
+ .setContent("イベント名前")
   var eventName = CardService.newTextInput()
                              .setFieldName("eventName_input")
-                             .setTitle("イベント名前")
+                             //.setTitle("イベント名前")
                              .setValue(title);
+  var memo_0 = CardService.newKeyValue()
+                        .setIcon(CardService.Icon.DESCRIPTION)
+                        .setContent("メモ");
   var memo = CardService.newTextInput()
                         .setFieldName("memo_input")
-                        .setTitle("メモ");
+                        .setMultiline(true) 
+                         //.setTitle("メモ"); 
+  var email_link_0 = CardService.newKeyValue() 
+                        .setIcon(CardService.Icon.EMAIL) 
+                        .setContent("リンク"); 
   var email_link = CardService.newTextInput()
                               .setFieldName("email_link")
-                              .setTitle("リンク")
+                              //.setTitle("リンク")
                               .setValue(url);                         
   var event_date = date.toString();
+  var event_dateGroup_0 = CardService.newKeyValue()
+                              .setIcon(CardService.Icon.INVITE)
+                              .setContent("日付け");
   var event_dateGroup = CardService.newTextInput()
                                    .setFieldName("date")
-                                   .setTitle("日付け")
-                                   .setValue(event_date);                                                        
+                                   //.setTitle("日付け")
+                                   .setValue(event_date);
+  var timeGroup_0 = CardService.newKeyValue()
+                               .setIcon(CardService.Icon.CLOCK)
+                               .setContent("時間");
   var timeGroup = CardService.newSelectionInput()
                              .setType(CardService.SelectionInputType.DROPDOWN)
-                             .setTitle("時間")
+                              //.setTitle("時間")
                              .setFieldName('time') //taskDate1.num
   
   for(var i = 0; i < 24; i++){//(24 - hour)
       var timeCatch = time.substr(0, 2);
       var start_time = i.toFixed() + ':00';
       if(i.toFixed() == timeCatch){
-        timeGroup.addItem(start_time, start_time, false)
-                 .addItem(time, time, true);
+        timeGroup.addItem(Utilities.formatString("%02d:00",start_time), start_time, true)
+                 
       } else {
-        timeGroup.addItem(start_time, start_time, false);
+        timeGroup.addItem(Utilities.formatString("%02d:00",start_time), start_time, false);
       }
   }                                                             
   
@@ -278,21 +301,25 @@ function GmailAddOn(e) {
   for(var i = 1; i < 25; i++){//(24 - hour)
       var event_time = i;
       var event_time_name = i + '時間';
-      event_timeGroup.addItem(event_time_name, event_time, false);
+      event_timeGroup.addItem(Utilities.formatString("%02d:00",event_time), event_time, false);
   }          
  
   var textButton = CardService.newTextButton()
                               .setText("追加する")
                               .setOnClickAction(CardService.newAction()
                                                            .setFunctionName("AddEventGmail"));
-                                                         
-  section.addWidget(eventName); 
+  section.addWidget(eventName_0);                                                       
+  section.addWidget(eventName);
+  section.addWidget(memo_0);
   section.addWidget(memo);
   section.addWidget(calGroup);
+  section.addWidget(event_dateGroup_0);
   section.addWidget(event_dateGroup);
+  section.addWidget(timeGroup_0);
   section.addWidget(timeGroup);  
   section.addWidget(event_timeGroup);
   section.addWidget(textButton);
+  section.addWidget(email_link_0);
   section.addWidget(email_link);
   
   var card = CardService.newCardBuilder()
@@ -300,6 +327,7 @@ function GmailAddOn(e) {
                                               .setTitle('<font color="#ea9999">イベント追加</font>'))
                         .addSection(section)
                         .build();
+  //return card;
   return CardService.newUniversalActionResponseBuilder()
                     .displayAddOnCards([card])
                     .build();
