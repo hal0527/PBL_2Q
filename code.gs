@@ -1,4 +1,6 @@
 function Cal2TodoAddOn(e) {
+  var accessToken = e.messageMetadata.accessToken;
+  GmailApp.setCurrentMessageAccessToken(accessToken);
   var taskList = TaskListData();
   var cards = []; 
   if (taskList.length > 0) {
@@ -65,7 +67,7 @@ function BuildCardTask(listData){
   var date = Utilities.formatDate(new Date(), "JST", "MMMMM d',' yyyy ");
   var dropdownGroup = CardService.newSelectionInput()
                                  .setType(CardService.SelectionInputType.DROPDOWN)
-                                 .setTitle('日付け')
+                                 .setTitle('イベント日付け')
                                  .setFieldName('date') //
                                  .addItem(date, date, true);
   for(var i = 1; i <= 9; i++){
@@ -76,7 +78,7 @@ function BuildCardTask(listData){
   var hour = Utilities.formatDate(new Date(), "JST", "HH");
   var dropdownGroup2 = CardService.newSelectionInput()
                                   .setType(CardService.SelectionInputType.DROPDOWN)
-                                  .setTitle("時")
+                                  .setTitle("開始時間(Hour)")
                                   .setFieldName('hour') //taskDate1.num
                                   .addItem(hour, hour, true);  
   for(var i = 1; i <= 23; i++){//(24 - hour)
@@ -90,7 +92,7 @@ function BuildCardTask(listData){
   var test = Math.ceil(min/10)*10;
   var dropdownGroup3 = CardService.newSelectionInput()
                                   .setType(CardService.SelectionInputType.DROPDOWN)
-                                  .setTitle("分")
+                                  .setTitle("開始時間(Minute)")
                                   .setFieldName('min');//taskDate1.num
   for(var i = 0; i <=5; i++){ //(60 - min)
     var minChange = new Date(new Date().getTime() + 1000 * 60 * 10 * i);
@@ -101,18 +103,18 @@ function BuildCardTask(listData){
     dropdownGroup3.addItem(min1, min1, false);
   }
   var textButton1 = CardService.newTextButton()
-                              .setText("OK")
+                              .setText("カレンダー追加を実行する")
                               .setOnClickAction(CardService.newAction()
                                                            .setFunctionName("AddEventTask"));
   var textButton2 = CardService.newTextButton()
-                              .setText("Open Calendar Link")
+                              .setText("Googleカレンダーを開く")
                               .setOpenLink(CardService.newOpenLink()
                                                       .setUrl("https://calendar.google.com/calendar/r"));
   var calNum = CalendarApp.getAllCalendars();
   var calname0 = CalendarApp.getDefaultCalendar().getName();
   var calGroup = CardService.newSelectionInput()
                               .setType(CardService.SelectionInputType.DROPDOWN)
-                              .setTitle("カレンダー")
+                              .setTitle("カレンダーの類別")
                               .setFieldName('calendar_name') //taskDate1.num
                               .addItem(calname0, calname0, true);
   for(var i = 0; i < calNum.length; i++){
@@ -123,6 +125,9 @@ function BuildCardTask(listData){
         calGroup.addItem(calname, claid, false);
       }
   }     
+  var textParagraph = CardService.newTextParagraph()
+    .setText("カレンダーに追加したい項目を<br>チェックしてください。"); 
+  section.addWidget(textParagraph);
   section.addWidget(checkboxGroup);
   section.addWidget(dropdownGroup);
   section.addWidget(dropdownGroup2);
@@ -210,7 +215,7 @@ function GmailAddOn(e) {
      }
   })
   if(date == undefined){
-    date = Utilities.formatDate(new Date(), "JST", "YYYY/MM/DD");//now
+    date = Utilities.formatDate(new Date(), "JST", "YYYY/MM/dd");//now
   }
   
   if(time == undefined){
@@ -246,10 +251,12 @@ function GmailAddOn(e) {
   
   for(var i = 0; i < 24; i++){//(24 - hour)
       var timeCatch = time.substr(0, 2);
+      Logger.log(timeCatch);
       var start_time = i.toFixed() + ':00';
-      if(i.toFixed() == timeCatch){
+      if(i.toFixed() == Number(timeCatch)){
         timeGroup.addItem(start_time, start_time, false)
                  .addItem(time, time, true);
+                 Logger.log('111111');
       } else {
         timeGroup.addItem(start_time, start_time, false);
       }
@@ -273,7 +280,7 @@ function GmailAddOn(e) {
   
   var event_timeGroup = CardService.newSelectionInput()
                               .setType(CardService.SelectionInputType.DROPDOWN)
-                              .setTitle("イベント時長")
+                              .setTitle("イベント時間の長さ")
                               .setFieldName('event_time') //taskDate1.num  
   for(var i = 1; i < 25; i++){//(24 - hour)
       var event_time = i;
@@ -282,10 +289,12 @@ function GmailAddOn(e) {
   }          
  
   var textButton = CardService.newTextButton()
-                              .setText("追加する")
+                              .setText("カレンダーに追加する")
                               .setOnClickAction(CardService.newAction()
                                                            .setFunctionName("AddEventGmail"));
-                                                         
+  var textParagraph = CardService.newTextParagraph()
+    .setText("カレンダーに追加したい項目をチェックしてください。");   
+  
   section.addWidget(eventName); 
   section.addWidget(memo);
   section.addWidget(calGroup);
@@ -297,7 +306,7 @@ function GmailAddOn(e) {
   
   var card = CardService.newCardBuilder()
                         .setHeader(CardService.newCardHeader()
-                                              .setTitle('<font color="#ea9999">イベント追加</font>'))
+                                              .setTitle('<font color="#ea9999">メールからカレンダーに追加</font>'))
                         .addSection(section)
                         .build();
   return CardService.newUniversalActionResponseBuilder()
