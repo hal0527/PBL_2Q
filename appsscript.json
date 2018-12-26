@@ -16,6 +16,10 @@
   "gmail": {
     "name": "Todo2Cal",
     "logoUrl": "http://mil.kilo.jp/aiit/todo2cal.jpg",
+    "contextualTriggers": [{
+      "unconditional": {},
+      "onTriggerFunction": "Cal2TodoAddOn"
+    }],
      "universalActions": [{
         "text": "メールからイベント追加",
         "runFunction": "GmailAddOn"
