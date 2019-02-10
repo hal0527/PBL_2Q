@@ -1,4 +1,4 @@
-function Cal2TodoAddOn(e) {
+function Cal2TodoAddOn(e) {  
   var accessToken = e.messageMetadata.accessToken;
   GmailApp.setCurrentMessageAccessToken(accessToken);
   var taskList = TaskListData();
@@ -13,7 +13,7 @@ function Cal2TodoAddOn(e) {
   } else {
     cards.push(CardService.newCardBuilder()
                           .setHeader(CardService.newCardHeader()
-                                                .setTitle('No Tasklist from Google Tasks')).build());
+                                                .setTitle('リストの中にはタスクがありません。')).build());
   }
   return cards;
 }
@@ -68,101 +68,106 @@ function BuildCardTask(listData){
     section.addWidget(textParagraph);                                                   
     card.addSection(section);
     return card.build();
-  }
-  var textParagraph = CardService.newKeyValue()
-                                 .setIcon(CardService.Icon.OFFER)
-                                 .setContent("カレンダーに追加したい項目を<br>チェックしてください。"); 
-  section.addWidget(textParagraph);
-  
-  if (taskData !== undefined) {
-    var checkboxGroup = CardService.newSelectionInput()
-                                   .setType(CardService.SelectionInputType.CHECK_BOX)
-                                   .setFieldName('check_box');
-    for (var i = 0; i <= taskData.length-1; i++) {
-      var taskData1 = taskData[i];
-      if(taskData1.status == 'needsAction'){
-        checkboxGroup.addItem(taskData1.name, taskData1.name, false);
+  } else {
+    var textParagraph = CardService.newKeyValue()
+                                   .setIcon(CardService.Icon.OFFER)
+                                   .setContent("カレンダーに追加したい項目を<br>チェックしてください。"); 
+    section.addWidget(textParagraph);
+    
+    if (taskData !== undefined) {
+     var checkboxGroup = CardService.newSelectionInput()
+                                     .setType(CardService.SelectionInputType.CHECK_BOX)
+                                     .setFieldName('check_box');
+      for (var i = 0; i <= taskData.length-1; i++) {
+        var taskData1 = taskData[i];
+        if(taskData1.status == 'needsAction'){
+          checkboxGroup.addItem(taskData1.name, taskData1.name, false);
+          Logger.log(taskData.name);
+        }
       }
+    } else {
+       var checkboxGroup =CardService.newKeyValue()
+                                     .setContent("リストの中にはタスクが取得できない。");
     }
     section.addWidget(checkboxGroup);
-  }
-  var date = Utilities.formatDate(new Date(), "JST", "MMMMM d',' yyyy ");
-  var dropdownGroup = CardService.newSelectionInput()
-                                 .setType(CardService.SelectionInputType.DROPDOWN)
-                                 .setTitle('イベント日付け')
-                                 .setFieldName('date') //
-                                 .addItem(date, date, true);
-  for(var i = 1; i <= 9; i++){
-    var dateChange = new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * i);
-    var date1 = Utilities.formatDate(dateChange, "JST", "MMMMM d',' yyyy ");
-    dropdownGroup.addItem(date1, date1, false);
-  }  
-  var hour = Utilities.formatDate(new Date(), "JST", "HH");
-  var dropdownGroup2 = CardService.newSelectionInput()
-                                  .setType(CardService.SelectionInputType.DROPDOWN)
-                                  .setTitle("開始時間(Hour)")
-                                  .setFieldName('hour') //taskDate1.num
-                                  .addItem(hour, hour, true);  
-  for(var i = 1; i <= 23; i++){//(24 - hour)
+    var date = Utilities.formatDate(new Date(), "JST", "MMMMM d',' yyyy ");
+    var dropdownGroup = CardService.newSelectionInput()
+                                   .setType(CardService.SelectionInputType.DROPDOWN)
+                                   .setTitle('イベント日付け')
+                                   .setFieldName('date') //
+                                   .addItem(date, date, true);
+    for(var i = 1; i <= 9; i++){
+      var dateChange = new Date(new Date().getTime() + 1000 * 60 * 60 * 24 * i);
+      var date1 = Utilities.formatDate(dateChange, "JST", "MMMMM d',' yyyy ");
+      dropdownGroup.addItem(date1, date1, false);
+    }  
     var hour = Utilities.formatDate(new Date(), "JST", "HH");
-    var hourChange = new Date(new Date().getTime() + 1000 * 60 * 60 * i);
-    var hour1 = Utilities.formatDate(hourChange, "JST", "HH");
-    dropdownGroup2.addItem(hour1, hour1, false);
-  }
+    var dropdownGroup2 = CardService.newSelectionInput()
+                                    .setType(CardService.SelectionInputType.DROPDOWN)
+                                    .setTitle("開始時間(Hour)")
+                                    .setFieldName('hour') //taskDate1.num
+                                    .addItem(hour, hour, true);  
+    for(var i = 1; i <= 23; i++){//(24 - hour)
+      var hour = Utilities.formatDate(new Date(), "JST", "HH");
+      var hourChange = new Date(new Date().getTime() + 1000 * 60 * 60 * i);
+      var hour1 = Utilities.formatDate(hourChange, "JST", "HH");
+      dropdownGroup2.addItem(hour1, hour1, false);
+    }
+    
+    var min = Utilities.formatDate(new Date(), "JST", "mm");
+    var test = Math.ceil(min/10)*10;
+    var dropdownGroup3 = CardService.newSelectionInput()
+                                    .setType(CardService.SelectionInputType.DROPDOWN)
+                                    .setTitle("開始時間(Minute)")
+                                    .setFieldName('min');//taskDate1.num
+    for(var i = 0; i <=5; i++){ //(60 - min)
+      var minChange = new Date(new Date().getTime() + 1000 * 60 * 10 * i);
+      var time_min = Utilities.formatDate(minChange, "JST", "mm");
+      var min1 = Math.ceil(time_min/10)*10;
+      if(min1==60)var min1=00;
+      var min1 = min1.toFixed();
+      dropdownGroup3.addItem(min1, min1, false);
+    }
+    var textButton1 = CardService.newTextButton()
+                                .setText("カレンダー追加を実行する")
+                                .setOnClickAction(CardService.newAction()
+                                                             .setFunctionName("AddEventTask"));
+    var textButton2 = CardService.newKeyValue()
+                                 .setIcon(CardService.Icon.STAR)
+                                 .setContent("Googleカレンダーを開く")
+                                 .setOpenLink(CardService.newOpenLink()
+                                                         .setUrl("https://calendar.google.com/calendar/r")
+                                                         .setOpenAs(CardService.OpenAs.OVERLAY)
+                                                         .setOnClose(CardService.OnClose.RELOAD_ADD_ON));                                                           
   
-  var min = Utilities.formatDate(new Date(), "JST", "mm");
-  var test = Math.ceil(min/10)*10;
-  var dropdownGroup3 = CardService.newSelectionInput()
-                                  .setType(CardService.SelectionInputType.DROPDOWN)
-                                  .setTitle("開始時間(Minute)")
-                                  .setFieldName('min');//taskDate1.num
-  for(var i = 0; i <=5; i++){ //(60 - min)
-    var minChange = new Date(new Date().getTime() + 1000 * 60 * 10 * i);
-    var time_min = Utilities.formatDate(minChange, "JST", "mm");
-    var min1 = Math.ceil(time_min/10)*10;
-    if(min1==60)var min1=00;
-    var min1 = min1.toFixed();
-    dropdownGroup3.addItem(min1, min1, false);
+    var calNum = CalendarApp.getAllCalendars();
+    var calname0 = CalendarApp.getDefaultCalendar().getName();
+    var calGroup = CardService.newSelectionInput()
+                                .setType(CardService.SelectionInputType.DROPDOWN)
+                                .setTitle("カレンダーの類別")
+                                .setFieldName('calendar_name') //taskDate1.num
+                                .addItem(calname0, calname0, true);
+    for(var i = 0; i < calNum.length; i++){
+        var event = CalendarApp.getAllCalendars();
+        var calname = calNum[i].getName();
+        var claid = calNum[i].getId();
+        if(calname !== calname0){
+          calGroup.addItem(calname, claid, false);
+        }
+    }     
+    section.setHeader('<font color="#0080ff"><b>タスクのリスト</b></font>');
+    section2.setHeader('<font color="#24998d"><b>イベントの設定</b></font>');
+    section2.addWidget(dropdownGroup);
+    section2.addWidget(dropdownGroup2);
+    section2.addWidget(dropdownGroup3);
+    section2.addWidget(calGroup);
+    section2.addWidget(textButton1);  
+    section2.addWidget(textButton2);                                                    
+    
+    card.addSection(section);
+    card.addSection(section2);
+    return card.build();
   }
-  var textButton1 = CardService.newTextButton()
-                              .setText("カレンダー追加を実行する")
-                              .setOnClickAction(CardService.newAction()
-                                                           .setFunctionName("AddEventTask"));
-  var textButton2 = CardService.newKeyValue()
-                               .setIcon(CardService.Icon.STAR)
-                               .setContent("Googleカレンダーを開く")
-                               .setOpenLink(CardService.newOpenLink()
-                                                       .setUrl("https://calendar.google.com/calendar/r")
-                                                       .setOpenAs(CardService.OpenAs.OVERLAY)
-                                                       .setOnClose(CardService.OnClose.RELOAD_ADD_ON));                                                           
-
-  var calNum = CalendarApp.getAllCalendars();
-  var calname0 = CalendarApp.getDefaultCalendar().getName();
-  var calGroup = CardService.newSelectionInput()
-                              .setType(CardService.SelectionInputType.DROPDOWN)
-                              .setTitle("カレンダーの類別")
-                              .setFieldName('calendar_name') //taskDate1.num
-                              .addItem(calname0, calname0, true);
-  for(var i = 0; i < calNum.length; i++){
-      var event = CalendarApp.getAllCalendars();
-      var calname = calNum[i].getName();
-      var claid = calNum[i].getId();
-      if(calname !== calname0){
-        calGroup.addItem(calname, claid, false);
-      }
-  }     
-  section.setHeader('<font color="#0080ff"><b>タスクのリスト</b></font>');
-  section2.setHeader('<font color="#24998d"><b>イベントの設定</b></font>');
-  section2.addWidget(dropdownGroup);
-  section2.addWidget(dropdownGroup2);
-  section2.addWidget(dropdownGroup3);
-  section2.addWidget(calGroup);
-  section2.addWidget(textButton1);  
-  section2.addWidget(textButton2);                                                    
-  
-  card.addSection(section);
-  card.addSection(section2);
-  return card.build();
 }
 
 function AddEventTask(e){

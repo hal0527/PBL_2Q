@@ -7,7 +7,7 @@ function GmailAddOn(e) {
   var textbody = message.getPlainBody();
   var title = message.getSubject();
   var url = message.getThread().getPermalink();
-  var date,time;
+  var date,time,place;
   textbody.replace(/((\d{4}年(\d{1,2}月)\d{1,2}日))/g, function ($0) {
     if ($0 && $0 != date) {
        date = $0;
@@ -15,22 +15,52 @@ function GmailAddOn(e) {
        date = date.replace(/月/g, '/');
        date = date.replace(/日/g, '');
      } else {
-       date = '2018/12/12';
+       date = Utilities.formatDate(new Date(), "JST", "YYYY/MM/dd");
      }
   })
+  textbody.replace(/(((\d{1,2}月)\d{1,2}日))/g, function ($0) {
+          if ($0 && $0 != date) {
+             date = $0;
+             year = Utilities.formatDate(new Date(), "JST", "YYYY/");
+             date = date.replace(/月/g, '/');
+             date = date.replace(/日/g, '');
+             date = year + date;
+           } else {
+             date = Utilities.formatDate(new Date(), "JST", "YYYY/MM/dd");
+           }
+        })
   if(date == undefined){
     date = Utilities.formatDate(new Date(), "JST", "YYYY/MM/dd");//now
   }
   
-  if(time == undefined){
-    time = Utilities.formatDate(new Date(), "JST", "HH:mm");
-  }
-  textbody.replace(/(\d{1,2}(:\d{1,2}))/g, function ($0) {
-    if ($0 && $0 != time) {
-       time = $0;
-     }
+  textbody.replace(/(\d{1,2}(:\d{1,2}))/g, function ($0, $1) {
+      if(time){
+      
+      } else{
+        if ($0 && $0 != time) {
+           time = $1;   
+         }
+      }
   })
-  textbody.replace(); 
+  textbody.replace(/(場所：\w+)/g, function ($0, $1) {
+     if(place || place == ''){
+      
+      } else{
+        if ($0) {
+           place = $1;   
+         } else {
+           place = '';
+         }
+      }
+     
+  })
+  if(place == undefined || null){
+    place = '';
+  } 
+  if(time == undefined || null){
+    time = Utilities.formatDate(new Date(), "JST", "HH:mm");
+  } 
+
   //カードの設定                            
   var eventName = CardService.newTextInput()
                              .setFieldName("eventName_input")
@@ -38,6 +68,7 @@ function GmailAddOn(e) {
                              .setValue(title);
   var memo = CardService.newTextInput()
                         .setFieldName("memo_input")
+                        .setValue(place)
                         .setTitle("メモ");
   var email_link = CardService.newTextInput()
                               .setFieldName("email_link")
@@ -55,12 +86,10 @@ function GmailAddOn(e) {
   
   for(var i = 0; i < 24; i++){//(24 - hour)
       var timeCatch = time.substr(0, 2);
-      Logger.log(timeCatch);
       var start_time = i.toFixed() + ':00';
       if(i.toFixed() == Number(timeCatch)){
         timeGroup.addItem(start_time, start_time, false)
                  .addItem(time, time, true);
-                 Logger.log('111111');
       } else {
         timeGroup.addItem(start_time, start_time, false);
       }
@@ -138,9 +167,7 @@ function AddEventGmail(e){
                                                                       new Date(startTime),
                                                                       new Date(endTime),
                                                                       {description: memo});
-                                                                      
-                                                           Logger.log(startTime);
-                                                           Logger.log(endTime);
+                                                                    
   } 
     
   return CardService.newActionResponseBuilder()
